@@ -197,10 +197,10 @@ func _process(delta):
 							deck.erase(card)
 							remove_child(card)
 					
-				anchor = deck.find(pair[1])
 				
 				#reshaping the deck
-				if(deck.size() > 14):
+				anchor = deck.find(pair[1])
+				if(deck.size() >= 14):
 					if(match_up == true):
 						var space = floor(((deck[anchor].get_pos().y - top_pos) / shift))
 						space = space - anchor
@@ -209,12 +209,15 @@ func _process(delta):
 							var temp = deck[last]
 							deck.pop_back()
 							deck.push_front(temp)
-					
-					bottom_pos = top_pos + (deck.size() * shift)
 				else:
-					print("Deck is small")
+					var temp_y = (800 - (shift * deck.size())) / 2 #viewport height
+					top_pos = temp_y
+					temp_y += (shift * anchor)
+					deck[anchor].set_pos(Vector2(155, temp_y))
+				bottom_pos = top_pos + (deck.size() * shift)
 				
 				
+				anchor = deck.find(pair[1])
 				index = anchor + 1
 				while(index < deck.size()):
 					var position = deck[index].get_pos()

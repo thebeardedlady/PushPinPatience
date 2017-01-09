@@ -10,9 +10,10 @@ var selected = []
 var pair = [] #used for discarding
 var deck_index = 0
 var counter = 0
-var top_pos = -60
+var top_pos = -120
 var bottom_pos
 var shift = 60
+var printed = false
 var cards = preload("res://scenes/card.xscn")
 var suits = ["C","D","H","S"]
 var ranks = ["A", "2", "3", "4", "5",
@@ -24,8 +25,8 @@ func _ready():
 	# Initialization here\
 	
 	#create cards
-	for i in range(suits.size()):
-		for j in range(ranks.size()):
+	for i in range(suits.size()): #mess with to check endgame logic
+		for j in range(ranks.size()): #originally suits.size() then ranks.size()
 			var card_instance = cards.instance()
 			var texture = load("res://cards/" + suits[i] + ranks[j] + ".png")
 			card_instance.suit = suits[i]
@@ -37,7 +38,8 @@ func _ready():
 	
 	#shuffle deck
 	for i in range(deck.size()):
-		var num = rand_range_int(i, 51)
+		var last = deck.size() - 1
+		var num = rand_range_int(i, last)
 		var temp = deck[i]
 		deck[i] = deck[num]
 		deck[num] = temp
@@ -50,13 +52,12 @@ func _ready():
 		deck[i].set_z(depth)
 		column.y += shift
 		depth += 1
+	get_node("cards_left").set_text(str(deck.size()))
 	set_process(true)
 
 func _process(delta):
-	#uneven cards occur because once a card is deleted
-	#the loop skips the top or bottom card which isn't
-	#updated and is kept where it is while the other
-	#cards are updated. 
+	
+	#move cards
 	if(Input.is_action_pressed("move_down")):
 		for card in deck:
 			var temp_pos = card.get_pos()
@@ -168,20 +169,17 @@ func _process(delta):
 						deck.erase(card)
 						remove_child(card)
 				
-				
+				var temp_y = (800 - (shift * (deck.size() + 2))) / 2 #viewport height
+				top_pos = temp_y
 				anchor = deck.find(pair[1])
-				index = anchor + 1
-				while(index < deck.size()):
-					var position = deck[index].get_pos()
-					position.y = deck[index - 1].get_pos().y + shift
-					deck[index].set_pos(position)
-					index += 1
-				index = anchor - 1
-				while(index > -1):
-					var position = deck[index].get_pos()
-					position.y = deck[index + 1].get_pos().y - shift
-					deck[index].set_pos(position)
-					index -= 1
+				if(anchor == 0):
+					deck[anchor].set_pos(Vector2(155, temp_y))
+					deck[anchor + 1].set_pos(Vector2(155, temp_y + shift))
+				elif(anchor == 1):
+					deck[anchor - 1].set_pos(Vector2(155, temp_y))
+					deck[anchor].set_pos(Vector2(155, temp_y + shift))
+				bottom_pos = top_pos + (deck.size() * shift)
+				get_node("cards_left").set_text(str(deck.size()))
 				
 			elif(match_down == true or match_up == true):
 				if(match_down == true):
@@ -196,7 +194,6 @@ func _process(delta):
 						if(discard_up.has(card)):
 							deck.erase(card)
 							remove_child(card)
-					
 				
 				#reshaping the deck
 				anchor = deck.find(pair[1])
@@ -210,11 +207,12 @@ func _process(delta):
 							deck.pop_back()
 							deck.push_front(temp)
 				else:
-					var temp_y = (800 - (shift * deck.size())) / 2 #viewport height
+					var temp_y = (800 - (shift * (deck.size() + 2))) / 2 #viewport height
 					top_pos = temp_y
-					temp_y += (shift * anchor)
+					temp_y += (shift * anchor) + (shift/2)
 					deck[anchor].set_pos(Vector2(155, temp_y))
 				bottom_pos = top_pos + (deck.size() * shift)
+				get_node("cards_left").set_text(str(deck.size()))
 				
 				
 				anchor = deck.find(pair[1])
@@ -239,6 +237,7 @@ func _process(delta):
 	if(pair.size() != 2):
 		counter = 0
 	
+	#depth, aabb, selection, opacity
 	for i in range(deck.size()):
 		deck[i].set_z(i)
 		deck[i].rect.pos = deck[i].get_pos()
@@ -246,6 +245,50 @@ func _process(delta):
 			deck[i].set_modulate(Color(0.6,0.6,6.0))
 		else:
 			deck[i].set_modulate(Color(1.0,1.0,1.0))
+		if(deck.size() > 2):
+			if(deck[i].get_pos().y < top_pos + (shift/2)):
+				var opacity = (deck[i].get_pos().y - top_pos) / (shift/2)
+				deck[i].set_opacity(opacity)
+			elif(deck[i].get_pos().y > bottom_pos - (shift/2)):
+				var opacity = (bottom_pos - deck[i].get_pos().y) / (shift/2)
+				deck[i].set_opacity(opacity)
+			else:
+				deck[i].set_opacity(1)
+		else:
+			deck[i].set_opacity(1)
+	
+	#possible moves
+	var moves_left = false
+	for i in range(deck.size()):
+		var two = []
+		two.append(deck[i])
+		for i in range(deck.size() - 1):
+			var index = (deck.find(two[0]) + i) % (deck.size())
+			if(is_match(two[0].suit, two[0].rank, deck[index].suit, deck[index].rank) == IS_MATCH):
+				two.append(deck[index])
+				var cur_index = (deck.find(two[0]) + 1) % (deck.size())
+				var compare = deck[cur_index]
+				if(compare != two[1]):
+					var matching = true
+					cur_index = (cur_index + 1) % (deck.size())
+					while(matching == true and deck[cur_index] != two[1]):
+						if(is_match(compare.suit, compare.rank, deck[cur_index].suit, deck[cur_index].rank) != IS_MATCH):
+							matching = false
+						cur_index = (cur_index + 1) % (deck.size())
+					if(matching == true):
+						moves_left = true
+						break
+				two.pop_back()
+		two.clear()
+		if(moves_left == true):
+			break
+	
+	if(moves_left == false and printed == false):
+		if(deck.size() == 2):
+			print("You win")
+		else:
+			print("Out of Moves")
+		printed = true
 
 func rand_range_int(low, high):
 	randomize()

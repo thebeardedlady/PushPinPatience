@@ -15,5 +15,6 @@ func _ready():
 	set_process_input(true)
 
 func _input(event):
-	if(event.type == InputEvent.MOUSE_BUTTON and rect.has_point(event.pos) and event.is_pressed()):
-		get_node("../").add_to_selected(self)
+	if((event.type == InputEvent.MOUSE_BUTTON or event.type == InputEvent.SCREEN_TOUCH)):
+		if(rect.has_point(event.pos) and event.is_pressed()):
+			get_node("../").add_to_selected(self)

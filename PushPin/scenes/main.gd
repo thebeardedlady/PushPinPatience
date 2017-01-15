@@ -4,7 +4,7 @@ extends Node2D
 const EXACT_COPY = 2
 const IS_MATCH = 1
 const NO_MATCH = 0
-const NORMAL_SPEED = 300
+const NORMAL_SPEED = 400
 var deck = []
 var selected = []
 var pair = [] #used for discarding
@@ -14,6 +14,7 @@ var top_pos = -120
 var bottom_pos
 var shift = 60
 var printed = false
+var hold = 0.0
 var cards = preload("res://scenes/card.xscn")
 var suits = ["C","D","H","S"]
 var ranks = ["A", "2", "3", "4", "5",
@@ -24,41 +25,69 @@ func _ready():
 	# Called every time the node is added to the scene.
 	# Initialization here\
 	
-	#create cards
-	for i in range(suits.size()): #mess with to check endgame logic
-		for j in range(ranks.size()): #originally suits.size() then ranks.size()
+	#next 2 blocks are starting a new game
+	#i.e. if save data == "0"
+	var data
+	data = load_save()
+	
+	if(data == "0"):
+		#create cards
+		for i in range(suits.size()): #mess with to check endgame logic
+			for j in range(ranks.size()): #originally suits.size() then ranks.size()
+				var card_instance = cards.instance()
+				var texture = load("res://cards/" + suits[i] + ranks[j] + ".png")
+				card_instance.suit = suits[i]
+				card_instance.rank = ranks[j]
+				card_instance.set_texture(texture)
+				
+				deck.append(card_instance)
+				add_child(card_instance)
+	
+		#shuffle deck
+		for i in range(deck.size()):
+			var last = deck.size() - 1
+			var num = rand_range_int(i, last)
+			var temp = deck[i]
+			deck[i] = deck[num]
+			deck[num] = temp
+		
+		var save_data = create_deck_data()
+		save(save_data)
+	else:
+		var old_deck = data.split(",", false)
+		for card in old_deck:
+			var suit = card.left(1)
+			var rank = card.right(1)
 			var card_instance = cards.instance()
-			var texture = load("res://cards/" + suits[i] + ranks[j] + ".png")
-			card_instance.suit = suits[i]
-			card_instance.rank = ranks[j]
+			var texture = load("res://cards/" + suit + rank + ".png")
+			card_instance.suit = suit
+			card_instance.rank = rank
 			card_instance.set_texture(texture)
 			
 			deck.append(card_instance)
 			add_child(card_instance)
 	
-	#shuffle deck
-	for i in range(deck.size()):
-		var last = deck.size() - 1
-		var num = rand_range_int(i, last)
-		var temp = deck[i]
-		deck[i] = deck[num]
-		deck[num] = temp
+	if(deck.size() < 14): 
+		top_pos = (800 - (shift * (deck.size() + 2))) / 2 #viewport height
 	
-	bottom_pos = top_pos + (deck.size() * shift) 
-	var column = Vector2(155, (top_pos + shift))
+	
 	var depth = 0
+	var column = Vector2(155, (top_pos + (shift/2)))
 	for i in range(deck.size()):
 		deck[i].set_pos(column)
 		deck[i].set_z(depth)
 		column.y += shift
 		depth += 1
+	bottom_pos = top_pos + (deck.size() * shift)
+	
+	get_node("end_screen/end_message").hide()
 	get_node("cards_left").set_text(str(deck.size()))
 	set_process(true)
 
 func _process(delta):
 	
 	#move cards
-	if(Input.is_action_pressed("move_down")):
+	if(Input.is_action_pressed("move_down") or get_node("go_down").is_pressed()):
 		for card in deck:
 			var temp_pos = card.get_pos()
 			temp_pos.y += NORMAL_SPEED * delta
@@ -74,7 +103,7 @@ func _process(delta):
 			deck.pop_back()
 			deck.push_front(temp_card)
 	
-	if(Input.is_action_pressed("move_up")):
+	if(Input.is_action_pressed("move_up") or get_node("go_up").is_pressed()):
 		for card in deck:
 			var temp_pos = card.get_pos()
 			temp_pos.y -= NORMAL_SPEED * delta
@@ -181,6 +210,9 @@ func _process(delta):
 				bottom_pos = top_pos + (deck.size() * shift)
 				get_node("cards_left").set_text(str(deck.size()))
 				
+				var save_data = create_deck_data()
+				save(save_data)
+				
 			elif(match_down == true or match_up == true):
 				if(match_down == true):
 					print("Valid discard below of size " + str(discard_down.size()))
@@ -228,6 +260,9 @@ func _process(delta):
 					position.y = deck[index + 1].get_pos().y - shift
 					deck[index].set_pos(position)
 					index -= 1
+				
+				var save_data = create_deck_data()
+				save(save_data)
 			else:
 				print("Invalid discard")
 		else:
@@ -284,11 +319,65 @@ func _process(delta):
 			break
 	
 	if(moves_left == false and printed == false):
+		get_node("end_screen/end_message").show()
+		save("0")
 		if(deck.size() == 2):
 			print("You win")
+			get_node("end_screen/end_message").set_text("You Win!")
 		else:
 			print("Out of Moves")
+			get_node("end_screen/end_message").set_text("Out of Moves")
 		printed = true
+	
+	if(get_node("cards_left").is_pressed()):
+		if(hold < 0.9):
+			hold += delta
+		else:
+			#start new game
+			
+			#remove old cards
+			for i in range(deck.size()):
+				remove_child(deck[i])
+			deck.clear()
+			
+			#create new cards
+			for i in range(suits.size()): #mess with to check endgame logic
+				for j in range(ranks.size()): #originally suits.size() then ranks.size()
+					var card_instance = cards.instance()
+					var texture = load("res://cards/" + suits[i] + ranks[j] + ".png")
+					card_instance.suit = suits[i]
+					card_instance.rank = ranks[j]
+					card_instance.set_texture(texture)
+					
+					deck.append(card_instance)
+					add_child(card_instance)
+	
+			#shuffle deck
+			for i in range(deck.size()):
+				var last = deck.size() - 1
+				var num = rand_range_int(i, last)
+				var temp = deck[i]
+				deck[i] = deck[num]
+				deck[num] = temp
+			
+			top_pos = -120
+			var depth = 0
+			var column = Vector2(155, (top_pos + (shift/2)))
+			for i in range(deck.size()):
+				deck[i].set_pos(column)
+				deck[i].set_z(depth)
+				column.y += shift
+				depth += 1
+			bottom_pos = top_pos + (deck.size() * shift)
+			
+			var save_data = create_deck_data()
+			save(save_data)
+			get_node("end_screen/end_message").hide()
+			get_node("cards_left").set_text(str(deck.size()))
+			hold = 0.0
+			printed = false
+	else:
+		hold = 0.0
 
 func rand_range_int(low, high):
 	randomize()
@@ -306,3 +395,25 @@ func is_match(suit1, rank1, suit2, rank2):
 	else:
 		return NO_MATCH
 
+func create_deck_data():
+	var deck_data = ""
+	for i in range(deck.size()):
+		deck_data += deck[i].suit + deck[i].rank + ","
+	return deck_data
+
+func save(content):
+	var file = File.new()
+	file.open("user://saved_game.pp", file.WRITE)
+	if(file.is_open()):
+		file.store_string(content)
+	file.close()
+
+func load_save():
+	var file = File.new()
+	var data
+	if(file.file_exists("user://saved_game.pp")):
+		file.open("user://saved_game.pp", file.READ)
+		data = file.get_as_text()
+		return data
+	else:
+		return "0"

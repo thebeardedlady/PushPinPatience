@@ -297,8 +297,8 @@ func _process(delta):
 	for i in range(deck.size()):
 		var two = []
 		two.append(deck[i])
-		for i in range(deck.size() - 1):
-			var index = (deck.find(two[0]) + i) % (deck.size())
+		for j in range(deck.size()):
+			var index = (deck.find(two[0]) + j) % (deck.size())
 			if(is_match(two[0].suit, two[0].rank, deck[index].suit, deck[index].rank) == IS_MATCH):
 				two.append(deck[index])
 				var cur_index = (deck.find(two[0]) + 1) % (deck.size())
@@ -330,7 +330,7 @@ func _process(delta):
 		printed = true
 	
 	if(get_node("cards_left").is_pressed()):
-		if(hold < 0.9):
+		if(hold < 1.0):
 			hold += delta
 		else:
 			#start new game
@@ -339,6 +339,7 @@ func _process(delta):
 			for i in range(deck.size()):
 				remove_child(deck[i])
 			deck.clear()
+			
 			
 			#create new cards
 			for i in range(suits.size()): #mess with to check endgame logic
@@ -381,7 +382,7 @@ func _process(delta):
 
 func rand_range_int(low, high):
 	randomize()
-	return randf() * (high - low) + low
+	return ceil(randf() * (high - low) + low)
 
 func add_to_selected(card):
 	selected.append(card)

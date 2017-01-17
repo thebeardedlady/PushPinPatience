@@ -12,7 +12,7 @@ func _ready():
 	# Initialization here
 	rect = Rect2(self.get_pos(), self.get_texture().get_size())
 	is_selected = false
-	set_process_input(true)
+	#set_process_input(true)
 
 func _input(event):
 	if((event.type == InputEvent.MOUSE_BUTTON or event.type == InputEvent.SCREEN_TOUCH)):

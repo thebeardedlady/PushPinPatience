@@ -10,11 +10,14 @@ var selected = []
 var pair = [] #used for discarding
 var deck_index = 0
 var counter = 0
-var top_pos = -120
+var top_pos = -90
 var bottom_pos
 var shift = 60
 var printed = false
 var hold = 0.0
+var new_game = false
+var discard_cards = []
+onready var tween = get_node("Tween")
 var cards = preload("res://scenes/card.xscn")
 var suits = ["C","D","H","S"]
 var ranks = ["A", "2", "3", "4", "5",
@@ -69,316 +72,307 @@ func _ready():
 	
 	if(deck.size() < 14): 
 		top_pos = (800 - (shift * (deck.size() + 2))) / 2 #viewport height
-	
-	
-	var depth = 0
-	var column = Vector2(155, (top_pos + (shift/2)))
-	for i in range(deck.size()):
-		deck[i].set_pos(column)
-		deck[i].set_z(depth)
-		column.y += shift
-		depth += 1
 	bottom_pos = top_pos + (deck.size() * shift)
+	
+	for i in range(deck.size()):
+		var old_pos = Vector2(0,0)
+		old_pos.x = rand_range_int(-75, 525)
+		old_pos.y = rand_range_int(801, 1000)
+		deck[i].set_pos(old_pos)
+		deck[i].set_z(i)
 	
 	get_node("end_screen/end_message").hide()
 	get_node("cards_left").set_text(str(deck.size()))
-	set_process(true)
+	#set_process(true)
+	
+	var final_pos = Vector2(155, (top_pos + (shift/2)))
+	for i in range(deck.size()):
+		tween.interpolate_property(deck[i], "transform/pos", deck[i].get_pos(), final_pos, 1.0, tween.TRANS_QUAD, tween.EASE_OUT, 0.25) 
+		final_pos.y += shift
+	
+	tween.start()
 
 func _process(delta):
 	
-	#move cards
-	if(Input.is_action_pressed("move_down") or get_node("go_down").is_pressed()):
+	if(new_game == true):
+		#remove cards
 		for card in deck:
-			var temp_pos = card.get_pos()
-			temp_pos.y += NORMAL_SPEED * delta
-			card.set_pos(temp_pos)
+			remove_child(card)
+		deck.clear()
 		
-		var back = deck.size() - 1
-		if(deck[back].get_pos().y > bottom_pos):
-			var temp_pos = deck[back].get_pos()
-			temp_pos.y = deck[0].get_pos().y - shift
-			deck[back].set_pos(temp_pos)
-			
-			var temp_card = deck[back]
-			deck.pop_back()
-			deck.push_front(temp_card)
-	
-	if(Input.is_action_pressed("move_up") or get_node("go_up").is_pressed()):
-		for card in deck:
-			var temp_pos = card.get_pos()
-			temp_pos.y -= NORMAL_SPEED * delta
-			card.set_pos(temp_pos)
 		
-		if(deck[0].get_pos().y < top_pos):
-			var temp_pos = deck[0].get_pos()
+		#create new cards
+		for i in range(suits.size()): #mess with to check endgame logic
+			for j in range(ranks.size()): #originally suits.size() then ranks.size()
+				var card_instance = cards.instance()
+				var texture = load("res://cards/" + suits[i] + ranks[j] + ".png")
+				card_instance.suit = suits[i]
+				card_instance.rank = ranks[j]
+				card_instance.set_texture(texture)
+				
+				deck.append(card_instance)
+				add_child(card_instance)
+		
+		#shuffle deck
+		for i in range(deck.size()):
 			var last = deck.size() - 1
-			temp_pos.y = deck[last].get_pos().y + shift
-			deck[0].set_pos(temp_pos)
+			var num = rand_range_int(i, last)
+			var temp = deck[i]
+			deck[i] = deck[num]
+			deck[num] = temp
+		
+		var save_data = create_deck_data()
+		save(save_data)
+		
+		for i in range(deck.size()):
+			var old_pos = Vector2(0,0)
+			old_pos.x = rand_range_int(-75, 525)
+			old_pos.y = rand_range_int(801, 1000)
+			deck[i].set_pos(old_pos)
+			deck[i].set_z(i)
+		
+		top_pos = -90
+		bottom_pos = top_pos + (deck.size() * shift)
+		get_node("end_screen/end_message").hide()
+		get_node("cards_left").set_text(str(deck.size()))
+		var final_pos = Vector2(155, (top_pos + (shift/2)))
+		for i in range(deck.size()):
+			tween.interpolate_property(deck[i], "transform/pos", deck[i].get_pos(), final_pos, 1.0, tween.TRANS_QUAD, tween.EASE_OUT, 0.1) 
+			final_pos.y += shift
+		
+		new_game = false
+		tween.start()
+	else:
+		#move cards
+		if(Input.is_action_pressed("move_down") or get_node("go_down").is_pressed()):
+			for card in deck:
+				var temp_pos = card.get_pos()
+				temp_pos.y += NORMAL_SPEED * delta
+				card.set_pos(temp_pos)
 			
-			var temp_card = deck[0]
-			deck.pop_front()
-			deck.push_back(temp_card)
-	
-	#select/deselect a card
-	if(selected.size() > 0):
-		var prev_depth = -100
-		var index = -1
-		for i in range(selected.size()):
-			if(selected[i].get_z() > prev_depth):
-				index = i
-				prev_depth = selected[i].get_z()
-		if(selected[index].is_selected == true):
-			selected[index].is_selected = false
-			pair.erase(selected[index])
-		else:
-			selected[index].is_selected = true
-			if(pair.size() == 2):
-				pair[0].is_selected = false
-				pair[1].is_selected = false
-				pair.clear()
-			pair.append(selected[index])
-		selected.clear()
-	
-	
-	#discard cards
-	if(pair.size() == 2 and counter == 0):
-		if(is_match(pair[0].suit, pair[0].rank, pair[1].suit, pair[1].rank) == IS_MATCH):
-			var anchor = deck.find(pair[1])
-			var match_down = true
-			var match_up = true
-			var index
-			var compare
-			var current
-			var discard_up = []
-			var discard_down = []
+			var back = deck.size() - 1
+			if(deck[back].get_pos().y > bottom_pos):
+				var temp_pos = deck[back].get_pos()
+				temp_pos.y = deck[0].get_pos().y - shift
+				deck[back].set_pos(temp_pos)
+				
+				var temp_card = deck[back]
+				deck.pop_back()
+				deck.push_front(temp_card)
+		
+		if(Input.is_action_pressed("move_up") or get_node("go_up").is_pressed()):
+			for card in deck:
+				var temp_pos = card.get_pos()
+				temp_pos.y -= NORMAL_SPEED * delta
+				card.set_pos(temp_pos)
 			
-			
-			index = (anchor + 1 + deck.size()) % (deck.size())
-			compare = deck[index]
-			if(compare != pair[0]):
-				discard_down.append(compare)
-				index = (index + 1 + deck.size()) % (deck.size())
-				current = deck[index]
-				while(match_down == true and current != pair[0]):
-					if(is_match(compare.suit, compare.rank, current.suit, current.rank) != IS_MATCH):
-						match_down = false
+			if(deck[0].get_pos().y < top_pos):
+				var temp_pos = deck[0].get_pos()
+				var last = deck.size() - 1
+				temp_pos.y = deck[last].get_pos().y + shift
+				deck[0].set_pos(temp_pos)
+				
+				var temp_card = deck[0]
+				deck.pop_front()
+				deck.push_back(temp_card)
+		
+		#select/deselect a card
+		if(selected.size() > 0):
+			var prev_depth = -100
+			var index = -1
+			for i in range(selected.size()):
+				if(selected[i].get_z() > prev_depth):
+					index = i
+					prev_depth = selected[i].get_z()
+			if(selected[index].is_selected == true):
+				selected[index].is_selected = false
+				pair.erase(selected[index])
+			else:
+				selected[index].is_selected = true
+				if(pair.size() == 2):
+					pair[0].is_selected = false
+					pair[1].is_selected = false
+					pair.clear()
+				pair.append(selected[index])
+			selected.clear()
+	
+		#depth, aabb, selection, opacity
+		for i in range(deck.size()):
+			deck[i].set_z(i)
+			deck[i].rect.pos = deck[i].get_pos()
+			if(deck[i].is_selected == true):
+				deck[i].set_modulate(Color(0.6,0.6,6.0))
+			else:
+				deck[i].set_modulate(Color(1.0,1.0,1.0))
+			if(tween.is_active() == false):
+				if(deck.size() > 2):
+					if(deck[i].get_pos().y < top_pos + (shift/2)):
+						var opacity = (deck[i].get_pos().y - top_pos) / (shift/2)
+						deck[i].set_opacity(opacity)
+					elif(deck[i].get_pos().y > bottom_pos - (shift/2)):
+						var opacity = (bottom_pos - deck[i].get_pos().y) / (shift/2)
+						deck[i].set_opacity(opacity)
 					else:
-						discard_down.append(current)
+						deck[i].set_opacity(1)
+				else:
+					deck[i].set_opacity(1)
+		
+		#possible moves
+		var moves_left = false
+		for i in range(deck.size()):
+			var two = []
+			two.append(deck[i])
+			for j in range(deck.size()):
+				var index = (deck.find(two[0]) + j) % (deck.size())
+				if(is_match(two[0].suit, two[0].rank, deck[index].suit, deck[index].rank) == IS_MATCH):
+					two.append(deck[index])
+					var cur_index = (deck.find(two[0]) + 1) % (deck.size())
+					var compare = deck[cur_index]
+					if(compare != two[1]):
+						var matching = true
+						cur_index = (cur_index + 1) % (deck.size())
+						while(matching == true and deck[cur_index] != two[1]):
+							if(is_match(compare.suit, compare.rank, deck[cur_index].suit, deck[cur_index].rank) != IS_MATCH):
+								matching = false
+							cur_index = (cur_index + 1) % (deck.size())
+						if(matching == true):
+							moves_left = true
+							break
+					two.pop_back()
+			two.clear()
+			if(moves_left == true):
+				break
+		
+		if(moves_left == false and printed == false):
+			get_node("end_screen/end_message").show()
+			get_node("cards_left").set_text("+")
+			save("0")
+			if(deck.size() == 2):
+				print("You win")
+				get_node("end_screen/end_message").set_text("You Win!")
+			else:
+				print("Out of Moves")
+				get_node("end_screen/end_message").set_text("Out of Moves")
+			printed = true
+		
+		#start new game
+		if(get_node("cards_left").is_pressed()):
+			if(hold < 1.0):
+				hold += delta
+			else:
+				for i in range(deck.size()):
+					var new_pos = Vector2(0,0)
+					new_pos.y = rand_range_int(850, 1050)
+					new_pos.x = rand_range_int(-75, 575)
+					tween.interpolate_property(deck[i], "transform/pos", deck[i].get_pos(), new_pos, 1.0, tween.TRANS_QUAD, tween.EASE_OUT)
+					tween.interpolate_property(deck[i], "visibility/opacity", deck[i].get_opacity(), 0.0, 1.0, tween.TRANS_CUBIC, tween.EASE_IN)
+					deck[i].set_process_input(false)
+				new_game = true
+				printed = false
+				set_process(false)
+				hold = 0.0
+				tween.start()
+		else:
+			hold = 0.0
+		
+		
+		
+		
+		if(pair.size() != 2):
+			counter = 0
+		
+		#discard cards
+		if(pair.size() == 2 and counter == 0):
+			if(is_match(pair[0].suit, pair[0].rank, pair[1].suit, pair[1].rank) == IS_MATCH):
+				var anchor = deck.find(pair[1])
+				var match_down = true
+				var match_up = true
+				var index
+				var compare
+				var current
+				var discard_up = []
+				var discard_down = []
+				
+				
+				#detect discard below
+				index = (anchor + 1 + deck.size()) % (deck.size())
+				compare = deck[index]
+				if(compare != pair[0]):
+					discard_down.append(compare)
 					index = (index + 1 + deck.size()) % (deck.size())
 					current = deck[index]
-			else:
-				match_down = false
-			
-			
-			index = (anchor - 1 + deck.size()) % (deck.size())
-			compare = deck[index]
-			if(compare != pair[0]):
-				discard_up.append(compare)
-				index = (index - 1 + deck.size()) % (deck.size())
-				current = deck[index]
-				while(match_up == true and current != pair[0]):
-					if(is_match(compare.suit, compare.rank, current.suit, current.rank) != IS_MATCH):
-						match_up = false
-					else:
-						discard_up.append(current)
+					while(match_down == true and current != pair[0]):
+						if(is_match(compare.suit, compare.rank, current.suit, current.rank) != IS_MATCH):
+							match_down = false
+						else:
+							discard_down.append(current)
+						index = (index + 1 + deck.size()) % (deck.size())
+						current = deck[index]
+				else:
+					match_down = false
+				
+				#detect discard above
+				index = (anchor - 1 + deck.size()) % (deck.size())
+				compare = deck[index]
+				if(compare != pair[0]):
+					discard_up.append(compare)
 					index = (index - 1 + deck.size()) % (deck.size())
 					current = deck[index]
-			else:
-				match_up = false
-			
-			
-			if(match_down == true and match_up == true):
-				print("Double Valid discard")
-				for card in discard_down:
-					if(deck.has(card)):
-						deck.erase(card)
-						remove_child(card)
-				for card in discard_up:
-					if(deck.has(card)):
-						deck.erase(card)
-						remove_child(card)
-				
-				var temp_y = (800 - (shift * (deck.size() + 2))) / 2 #viewport height
-				top_pos = temp_y
-				anchor = deck.find(pair[1])
-				if(anchor == 0):
-					deck[anchor].set_pos(Vector2(155, temp_y))
-					deck[anchor + 1].set_pos(Vector2(155, temp_y + shift))
-				elif(anchor == 1):
-					deck[anchor - 1].set_pos(Vector2(155, temp_y))
-					deck[anchor].set_pos(Vector2(155, temp_y + shift))
-				bottom_pos = top_pos + (deck.size() * shift)
-				get_node("cards_left").set_text(str(deck.size()))
-				
-				var save_data = create_deck_data()
-				save(save_data)
-				
-			elif(match_down == true or match_up == true):
-				if(match_down == true):
-					print("Valid discard below of size " + str(discard_down.size()))
-					for card in discard_down:
-						if(deck.has(card)):
-							deck.erase(card)
-							remove_child(card)
-				if(match_up == true):
-					print("Valid discard above of size " + str(discard_up.size()))
-					for card in discard_up:
-						if(discard_up.has(card)):
-							deck.erase(card)
-							remove_child(card)
-				
-				#reshaping the deck
-				anchor = deck.find(pair[1])
-				if(deck.size() >= 14):
-					if(match_up == true):
-						var space = floor(((deck[anchor].get_pos().y - top_pos) / shift))
-						space = space - anchor
-						for i in range(space):
-							var last = deck.size() - 1
-							var temp = deck[last]
-							deck.pop_back()
-							deck.push_front(temp)
+					while(match_up == true and current != pair[0]):
+						if(is_match(compare.suit, compare.rank, current.suit, current.rank) != IS_MATCH):
+							match_up = false
+						else:
+							discard_up.append(current)
+						index = (index - 1 + deck.size()) % (deck.size())
+						current = deck[index]
 				else:
-					var temp_y = (800 - (shift * (deck.size() + 2))) / 2 #viewport height
-					top_pos = temp_y
-					temp_y += (shift * anchor) + (shift/2)
-					deck[anchor].set_pos(Vector2(155, temp_y))
-				bottom_pos = top_pos + (deck.size() * shift)
-				get_node("cards_left").set_text(str(deck.size()))
+					match_up = false
 				
-				
-				anchor = deck.find(pair[1])
-				index = anchor + 1
-				while(index < deck.size()):
-					var position = deck[index].get_pos()
-					position.y = deck[index - 1].get_pos().y + shift
-					deck[index].set_pos(position)
-					index += 1
-				index = anchor - 1
-				while(index > -1):
-					var position = deck[index].get_pos()
-					position.y = deck[index + 1].get_pos().y - shift
-					deck[index].set_pos(position)
-					index -= 1
-				
-				var save_data = create_deck_data()
-				save(save_data)
-			else:
-				print("Invalid discard")
-		else:
-			print("No Match")
-		counter = 1
-	
-	if(pair.size() != 2):
-		counter = 0
-	
-	#depth, aabb, selection, opacity
-	for i in range(deck.size()):
-		deck[i].set_z(i)
-		deck[i].rect.pos = deck[i].get_pos()
-		if(deck[i].is_selected == true):
-			deck[i].set_modulate(Color(0.6,0.6,6.0))
-		else:
-			deck[i].set_modulate(Color(1.0,1.0,1.0))
-		if(deck.size() > 2):
-			if(deck[i].get_pos().y < top_pos + (shift/2)):
-				var opacity = (deck[i].get_pos().y - top_pos) / (shift/2)
-				deck[i].set_opacity(opacity)
-			elif(deck[i].get_pos().y > bottom_pos - (shift/2)):
-				var opacity = (bottom_pos - deck[i].get_pos().y) / (shift/2)
-				deck[i].set_opacity(opacity)
-			else:
-				deck[i].set_opacity(1)
-		else:
-			deck[i].set_opacity(1)
-	
-	#possible moves
-	var moves_left = false
-	for i in range(deck.size()):
-		var two = []
-		two.append(deck[i])
-		for j in range(deck.size()):
-			var index = (deck.find(two[0]) + j) % (deck.size())
-			if(is_match(two[0].suit, two[0].rank, deck[index].suit, deck[index].rank) == IS_MATCH):
-				two.append(deck[index])
-				var cur_index = (deck.find(two[0]) + 1) % (deck.size())
-				var compare = deck[cur_index]
-				if(compare != two[1]):
-					var matching = true
-					cur_index = (cur_index + 1) % (deck.size())
-					while(matching == true and deck[cur_index] != two[1]):
-						if(is_match(compare.suit, compare.rank, deck[cur_index].suit, deck[cur_index].rank) != IS_MATCH):
-							matching = false
-						cur_index = (cur_index + 1) % (deck.size())
-					if(matching == true):
-						moves_left = true
-						break
-				two.pop_back()
-		two.clear()
-		if(moves_left == true):
-			break
-	
-	if(moves_left == false and printed == false):
-		get_node("end_screen/end_message").show()
-		save("0")
-		if(deck.size() == 2):
-			print("You win")
-			get_node("end_screen/end_message").set_text("You Win!")
-		else:
-			print("Out of Moves")
-			get_node("end_screen/end_message").set_text("Out of Moves")
-		printed = true
-	
-	if(get_node("cards_left").is_pressed()):
-		if(hold < 1.0):
-			hold += delta
-		else:
-			#start new game
-			
-			#remove old cards
-			for i in range(deck.size()):
-				remove_child(deck[i])
-			deck.clear()
-			
-			
-			#create new cards
-			for i in range(suits.size()): #mess with to check endgame logic
-				for j in range(ranks.size()): #originally suits.size() then ranks.size()
-					var card_instance = cards.instance()
-					var texture = load("res://cards/" + suits[i] + ranks[j] + ".png")
-					card_instance.suit = suits[i]
-					card_instance.rank = ranks[j]
-					card_instance.set_texture(texture)
+				if(match_down == true or match_up == true):
+					var new_size = deck.size()
+					var time = 0.0
+					if(match_down == true and match_up == true):
+						time = (discard_down.size() + discard_up.size()) * 0.05
+					else:
+						if(match_down == true):
+							time = discard_down.size() * 0.1
+						else:
+							time = discard_up.size() * 0.1
 					
-					deck.append(card_instance)
-					add_child(card_instance)
-	
-			#shuffle deck
-			for i in range(deck.size()):
-				var last = deck.size() - 1
-				var num = rand_range_int(i, last)
-				var temp = deck[i]
-				deck[i] = deck[num]
-				deck[num] = temp
-			
-			top_pos = -120
-			var depth = 0
-			var column = Vector2(155, (top_pos + (shift/2)))
-			for i in range(deck.size()):
-				deck[i].set_pos(column)
-				deck[i].set_z(depth)
-				column.y += shift
-				depth += 1
-			bottom_pos = top_pos + (deck.size() * shift)
-			
-			var save_data = create_deck_data()
-			save(save_data)
-			get_node("end_screen/end_message").hide()
-			get_node("cards_left").set_text(str(deck.size()))
-			hold = 0.0
-			printed = false
-	else:
-		hold = 0.0
+					if(match_down == true):
+						new_size -= discard_down.size()
+						for i in range(discard_down.size()):
+							discard_cards.append(discard_down[i])
+							tween.interpolate_property(discard_down[i], "visibility/opacity", discard_down[i].get_opacity(), 0.0, time, tween.TRANS_LINEAR, tween.EASE_OUT)
+					if(match_up == true):
+						new_size -= discard_up.size()
+						for i in range(discard_up.size()):
+							discard_cards.append(discard_up[i])
+							tween.interpolate_property(discard_up[i], "visibility/opacity", discard_up[i].get_opacity(), 0.0, time, tween.TRANS_LINEAR, tween.EASE_OUT)
+					
+					#setting the anchor position
+					if(new_size < 16):
+						top_pos = (800 - (shift * (new_size + 2))) / 2 #viewport height
+					bottom_pos = top_pos + (new_size * shift)
+					get_node("cards_left").set_text(str(new_size))
+					
+					var new_pos = Vector2(155, (top_pos + (shift/2)))
+					for i in range(deck.size()):
+						if(discard_cards.has(deck[i]) == false):
+							tween.interpolate_property(deck[i], "transform/pos", deck[i].get_pos(), new_pos, time, tween.TRANS_QUAD, tween.EASE_IN)
+							new_pos.y += shift
+							if(deck[i].get_opacity() != 1.0):
+								tween.interpolate_property(deck[i], "visibility/opacity", deck[i].get_opacity(), 1.0, time, tween.TRANS_LINEAR, tween.EASE_OUT)
+					
+					set_process(false)
+					for i in range(deck.size()):
+						deck[i].set_process_input(false)
+					tween.start()
+				else:
+					print("Invalid Discard")
+			else:
+				print("No match")
+			counter = 1
 
 func rand_range_int(low, high):
 	randomize()
@@ -418,3 +412,19 @@ func load_save():
 		return data
 	else:
 		return "0"
+
+func _on_Tween_tween_complete( object, key ):
+		if(discard_cards.size() > 0):
+			for card in discard_cards:
+				remove_child(card)
+				deck.erase(card)
+			discard_cards.clear()
+		
+		var save_data = create_deck_data()
+		save(save_data)
+		
+		
+		for i in range(deck.size()):
+			deck[i].set_process_input(true)
+		set_process(true)
+		tween.remove_all()

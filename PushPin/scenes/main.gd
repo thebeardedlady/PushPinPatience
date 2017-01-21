@@ -95,7 +95,7 @@ func _ready():
 func _process(delta):
 	
 	#move cards
-	if(Input.is_action_pressed("move_down") or get_node("go_down").is_pressed()):
+	if((Input.is_action_pressed("move_down") or get_node("go_down").is_pressed()) and false):
 		for card in deck:
 			var temp_pos = card.get_pos()
 			temp_pos.y += NORMAL_SPEED * delta
@@ -111,7 +111,7 @@ func _process(delta):
 			deck.pop_back()
 			deck.push_front(temp_card)
 	
-	if(Input.is_action_pressed("move_up") or get_node("go_up").is_pressed()):
+	if((Input.is_action_pressed("move_up") or get_node("go_up").is_pressed()) and false ):
 		for card in deck:
 			var temp_pos = card.get_pos()
 			temp_pos.y -= NORMAL_SPEED * delta

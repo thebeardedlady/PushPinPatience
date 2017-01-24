@@ -11,16 +11,16 @@ var top_pos = -90
 var bottom_pos
 var shift = 60
 var printed = false
-var hold = 0.0
-var new_game = false
 var tweens_left = 0
 var discard_cards = []
+var out_of_moves = false
 onready var tween = get_node("Tween")
 var cards = preload("res://scenes/card.xscn")
 var suits = ["C","D","H","S"]
 var ranks = ["A", "2", "3", "4", "5",
 			"6", "7", "8", "9", "X",
 			"J", "Q", "K"]
+
 
 func _ready():
 	# Called every time the node is added to the scene.
@@ -80,9 +80,8 @@ func _ready():
 		deck[i].set_pos(old_pos)
 		deck[i].set_z(i)
 	
-	get_node("end_screen/end_message").hide()
-	get_node("cards_left").set_text(str(deck.size()))
-	#set_process(true)
+	#get_node("end_screen").hide()
+	get_node("score/cards_left").set_text(str(deck.size()))
 	
 	var final_pos = Vector2(155, (top_pos + (shift/2)))
 	for i in range(deck.size()):
@@ -95,7 +94,7 @@ func _ready():
 func _process(delta):
 	
 	#move cards
-	if((Input.is_action_pressed("move_down") or get_node("go_down").is_pressed()) and false):
+	if(Input.is_action_pressed("move_down")):
 		for card in deck:
 			var temp_pos = card.get_pos()
 			temp_pos.y += NORMAL_SPEED * delta
@@ -111,7 +110,7 @@ func _process(delta):
 			deck.pop_back()
 			deck.push_front(temp_card)
 	
-	if((Input.is_action_pressed("move_up") or get_node("go_up").is_pressed()) and false ):
+	if(Input.is_action_pressed("move_up")):
 		for card in deck:
 			var temp_pos = card.get_pos()
 			temp_pos.y -= NORMAL_SPEED * delta
@@ -197,40 +196,24 @@ func _process(delta):
 			break
 	
 	if(moves_left == false and printed == false):
-		get_node("end_screen/end_message").show()
-		#get_node("cards_left").set_text("+")
+		#get_node("end_screen").show()
+		out_of_moves = true
+		for i in range(deck.size()):
+			deck[i].set_process_input(false)
+			if(deck[i].is_selected == true):
+				deck[i].set_modulate(Color(1.0, 1.0, 1.0))
+				deck[i].is_selected = false
+		get_node("touch").set_process_input(false)
 		save("0")
 		if(deck.size() == 2):
 			print("You win")
-			get_node("end_screen/end_message").set_text("You Win!")
+			get_node("end_screen/end_message").set_text(" You Win!  ")
 		else:
 			print("Out of Moves")
 			get_node("end_screen/end_message").set_text("Out of Moves")
+		get_node("end_screen/end_animation").play("end")
+		
 		printed = true
-	
-	#start new game
-	if(get_node("cards_left").is_pressed()):
-		if(hold < 1.0):
-			hold += delta
-		else:
-			for i in range(deck.size()):
-				var new_pos = Vector2(0,0)
-				new_pos.y = rand_range_int(850, 1050)
-				new_pos.x = rand_range_int(-75, 575)
-				tween.interpolate_property(deck[i], "transform/pos", deck[i].get_pos(), new_pos, 1.0, tween.TRANS_QUAD, tween.EASE_OUT)
-				tween.interpolate_property(deck[i], "visibility/opacity", deck[i].get_opacity(), 0.0, 1.0, tween.TRANS_CUBIC, tween.EASE_IN)
-				deck[i].set_process_input(false)
-			new_game = true
-			printed = false
-			set_process(false)
-			hold = 0.0
-			tweens_left = 1
-			tween.start()
-	else:
-		hold = 0.0
-	
-	
-	
 	
 	if(pair.size() != 2):
 		counter = 0
@@ -312,7 +295,7 @@ func _process(delta):
 				if(new_size < 16):
 					top_pos = (800 - (shift * (new_size + 2))) / 2 #viewport height
 				bottom_pos = top_pos + (new_size * shift)
-				get_node("cards_left").set_text(str(new_size))
+				get_node("score/cards_left").set_text(str(new_size))
 				
 				var new_pos = Vector2(155, (top_pos + (shift/2)))
 				for i in range(deck.size()):
@@ -321,8 +304,8 @@ func _process(delta):
 						new_pos.y += shift
 						if(deck[i].get_opacity() != 1.0):
 							tween.interpolate_property(deck[i], "visibility/opacity", deck[i].get_opacity(), 1.0, time, tween.TRANS_QUAD, tween.EASE_OUT)
-				
 				set_process(false)
+				get_node("touch").set_process_input(false)
 				for i in range(deck.size()):
 					deck[i].set_process_input(false)
 				

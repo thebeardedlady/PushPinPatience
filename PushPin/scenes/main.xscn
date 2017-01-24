@@ -1,28 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<resource_file type="PackedScene" subresource_count="7" version="2.1" version_name="Godot Engine v2.1.stable.official">
-	<ext_resource path="res://GUI/arrowUp.png" type="Texture" index="2"></ext_resource>
-	<ext_resource path="res://GUI/arrowDown.png" type="Texture" index="3"></ext_resource>
-	<ext_resource path="res://fonts/port-lligat-sans.regular.fnt" type="BitmapFont" index="1"></ext_resource>
-	<ext_resource path="res://scenes/animations.gd" type="Script" index="4"></ext_resource>
-	<ext_resource path="res://scenes/touch.gd" type="Script" index="5"></ext_resource>
+<resource_file type="PackedScene" subresource_count="11" version="2.1" version_name="Godot Engine v2.1.stable.official">
+	<ext_resource path="res://animations/rules.tres" type="Animation" index="7"></ext_resource>
+	<ext_resource path="res://cards/Back_G1.png" type="Texture" index="9"></ext_resource>
+	<ext_resource path="res://cards/Back_B1.png" type="Texture" index="6"></ext_resource>
 	<ext_resource path="res://scenes/main.gd" type="Script" index="0"></ext_resource>
+	<ext_resource path="res://scenes/touch.gd" type="Script" index="4"></ext_resource>
+	<ext_resource path="res://scenes/animations.gd" type="Script" index="3"></ext_resource>
+	<ext_resource path="res://scenes/score.gd" type="Script" index="8"></ext_resource>
+	<ext_resource path="res://scenes/rules_button.gd" type="Script" index="5"></ext_resource>
+	<ext_resource path="res://fonts/port-lligat-sans.regular.fnt" type="BitmapFont" index="1"></ext_resource>
+	<ext_resource path="res://animations/end.tres" type="Animation" index="2"></ext_resource>
 	<main_resource>
 		<dictionary name="_bundled" shared="false">
 			<string> "conn_count" </string>
-			<int> 1 </int>
+			<int> 2 </int>
 			<string> "conns" </string>
-			<int_array  len="6"> 				6, 7, 41, 40, 2, 0 </int_array>
+			<int_array  len="12"> 				5, 6, 65, 64, 2, 0, 12, 8, 67, 66, 2, 0 </int_array>
 			<string> "editable_instances" </string>
 			<array  len="0" shared="false">
 			</array>
 			<string> "names" </string>
-			<string_array  len="42">
+			<string_array  len="68">
 				<string> "main" </string>
 				<string> "script/script" </string>
 				<string> "Node2D" </string>
 				<string> "end_screen" </string>
 				<string> "z/z" </string>
-				<string> "end_message" </string>
+				<string> "z/relative" </string>
+				<string> "background" </string>
+				<string> "visibility/blend_mode" </string>
 				<string> "focus/ignore_mouse" </string>
 				<string> "focus/stop_mouse" </string>
 				<string> "size_flags/horizontal" </string>
@@ -31,6 +37,8 @@
 				<string> "margin/top" </string>
 				<string> "margin/right" </string>
 				<string> "margin/bottom" </string>
+				<string> "Panel" </string>
+				<string> "end_message" </string>
 				<string> "custom_fonts/font" </string>
 				<string> "custom_colors/font_color" </string>
 				<string> "text" </string>
@@ -40,66 +48,110 @@
 				<string> "lines_skipped" </string>
 				<string> "max_lines_visible" </string>
 				<string> "Label" </string>
-				<string> "go_up" </string>
-				<string> "toggle_mode" </string>
-				<string> "enabled_focus_mode" </string>
-				<string> "shortcut" </string>
-				<string> "icon" </string>
-				<string> "flat" </string>
-				<string> "Button" </string>
-				<string> "go_down" </string>
-				<string> "cards_left" </string>
-				<string> "Tween" </string>
+				<string> "end_animation" </string>
 				<string> "playback/process_mode" </string>
+				<string> "playback/default_blend_time" </string>
+				<string> "root/root" </string>
+				<string> "anims/end" </string>
 				<string> "playback/active" </string>
-				<string> "playback/repeat" </string>
 				<string> "playback/speed" </string>
+				<string> "blend_times" </string>
+				<string> "autoplay" </string>
+				<string> "AnimationPlayer" </string>
+				<string> "Tween" </string>
+				<string> "playback/repeat" </string>
 				<string> "animations" </string>
 				<string> "Node" </string>
 				<string> "touch" </string>
+				<string> "rules_button" </string>
+				<string> "card_back" </string>
+				<string> "toggle_mode" </string>
+				<string> "enabled_focus_mode" </string>
+				<string> "shortcut" </string>
+				<string> "textures/normal" </string>
+				<string> "params/scale" </string>
+				<string> "TextureButton" </string>
+				<string> "rules" </string>
+				<string> "visibility/opacity" </string>
+				<string> "bbcode/enabled" </string>
+				<string> "bbcode/bbcode" </string>
+				<string> "visible_characters" </string>
+				<string> "RichTextLabel" </string>
+				<string> "icon" </string>
+				<string> "rules_animation" </string>
+				<string> "anims/rules" </string>
+				<string> "score" </string>
+				<string> "cardback" </string>
+				<string> "textures/pressed" </string>
+				<string> "cards_left" </string>
+				<string> "rect/scale" </string>
 				<string> "_on_Tween_tween_complete" </string>
 				<string> "tween_complete" </string>
+				<string> "_on_rules_animation_finished" </string>
+				<string> "finished" </string>
 			</string_array>
 			<string> "node_count" </string>
-			<int> 9 </int>
+			<int> 16 </int>
 			<string> "node_paths" </string>
 			<array  len="0" shared="false">
 			</array>
 			<string> "nodes" </string>
-			<int_array  len="191"> 				-1, -1, 2, 0, -1, 1, 1, 0, 0, 0, 0, 2, 3, -1, 1, 4, 1, 0, 1, 0, 22, 5, -1, 16, 6, 2, 7, 2, 8, 3, 9, 4, 10, 5, 11, 6, 12, 7, 13, 8, 14, 9, 15, 10, 16, 11, 17, 12, 18, 12, 19, 13, 20, 4, 21, 14, 0, 0, 0, 29, 23, -1, 13, 6, 15, 7, 2, 8, 3, 9, 3, 10, 16, 11, 17, 12, 18, 13, 19, 24, 15, 25, 3, 26, 20, 27, 21, 28, 15, 0, 0, 0, 29, 30, -1, 13, 6, 15, 7, 2, 8, 3, 9, 3, 10, 22, 11, 17, 12, 23, 13, 19, 24, 15, 25, 3, 26, 20, 27, 24, 28, 15, 0, 0, 0, 29, 31, -1, 14, 6, 15, 7, 2, 8, 3, 9, 3, 10, 25, 11, 26, 12, 27, 13, 28, 14, 9, 24, 15, 25, 3, 26, 20, 16, 29, 28, 15, 0, 0, 0, 32, 32, -1, 4, 33, 12, 34, 15, 35, 15, 36, 13, 0, 0, 0, 38, 37, -1, 1, 1, 30, 0, 0, 0, 38, 39, -1, 1, 1, 31, 0 </int_array>
+			<int_array  len="360"> 				-1, -1, 2, 0, -1, 1, 1, 0, 0, 0, 0, 2, 3, -1, 2, 4, 1, 5, 2, 0, 1, 0, 16, 6, -1, 9, 7, 3, 8, 4, 9, 4, 10, 5, 11, 5, 12, 6, 13, 7, 14, 8, 15, 9, 0, 1, 0, 26, 17, -1, 16, 8, 4, 9, 4, 10, 5, 11, 10, 12, 11, 13, 12, 14, 13, 15, 14, 18, 15, 19, 16, 20, 17, 21, 3, 22, 3, 23, 18, 24, 10, 25, 19, 0, 1, 0, 36, 27, -1, 8, 28, 3, 29, 6, 30, 20, 31, 21, 32, 4, 33, 18, 34, 22, 35, 23, 0, 0, 0, 37, 37, -1, 4, 28, 3, 32, 2, 38, 2, 33, 18, 0, 0, 0, 40, 39, -1, 1, 1, 24, 0, 0, 0, 40, 41, -1, 1, 1, 25, 0, 0, 0, 2, 42, -1, 2, 4, 1, 1, 26, 0, 8, 0, 49, 43, -1, 13, 8, 2, 9, 4, 10, 5, 11, 5, 12, 27, 13, 28, 14, 29, 15, 30, 44, 2, 45, 5, 46, 31, 47, 32, 48, 33, 0, 8, 0, 55, 50, -1, 12, 51, 6, 8, 4, 9, 4, 10, 5, 11, 5, 12, 34, 13, 35, 14, 36, 15, 37, 52, 2, 53, 23, 54, 19, 0, 8, 0, 26, 56, -1, 15, 8, 4, 9, 4, 10, 5, 11, 10, 12, 38, 13, 39, 14, 40, 15, 41, 18, 15, 20, 42, 21, 3, 22, 3, 23, 18, 24, 10, 25, 19, 0, 8, 0, 36, 57, -1, 8, 28, 3, 29, 6, 30, 20, 58, 43, 32, 4, 33, 18, 34, 22, 35, 23, 0, 0, 0, 2, 59, -1, 2, 4, 1, 1, 44, 0, 13, 0, 49, 60, -1, 14, 8, 2, 9, 4, 10, 5, 11, 5, 12, 28, 13, 28, 14, 45, 15, 30, 44, 2, 45, 5, 46, 31, 47, 32, 61, 46, 48, 33, 0, 13, 0, 26, 62, -1, 16, 63, 47, 8, 4, 9, 4, 10, 5, 11, 10, 12, 48, 13, 49, 14, 50, 15, 51, 18, 15, 20, 52, 21, 3, 22, 3, 23, 18, 24, 10, 25, 19, 0 </int_array>
 			<string> "variants" </string>
-			<array  len="32" shared="false">
+			<array  len="53" shared="false">
 				<resource  external="0">  </resource>
 				<int> 100 </int>
+				<bool> False </bool>
+				<int> 1 </int>
 				<bool> True </bool>
 				<int> 2 </int>
+				<real> 0 </real>
+				<real> 850 </real>
+				<real> 450 </real>
+				<real> 950 </real>
 				<int> 0 </int>
-				<real> 41 </real>
-				<real> 707 </real>
-				<real> 417 </real>
-				<real> 777 </real>
+				<real> 37 </real>
+				<real> 865 </real>
+				<real> 413 </real>
+				<real> 935 </real>
 				<resource  external="1">  </resource>
 				<color> 0, 0, 0, 1 </color>
 				<string> "Out of Moves" </string>
-				<int> 1 </int>
 				<real> 1 </real>
 				<int> -1 </int>
-				<bool> False </bool>
-				<real> 21 </real>
-				<real> 344 </real>
-				<real> 133 </real>
-				<real> 456 </real>
-				<resource name=""></resource>				<resource  external="2">  </resource>
-				<real> 316 </real>
-				<real> 428 </real>
+				<node_path> ".." </node_path>
+				<resource  external="2">  </resource>
+				<array  len="0" shared="false">
+				</array>
+				<string> "" </string>
 				<resource  external="3">  </resource>
-				<real> 30 </real>
-				<real> 20 </real>
-				<real> 119 </real>
-				<real> 127 </real>
-				<string> "52" </string>
 				<resource  external="4">  </resource>
 				<resource  external="5">  </resource>
+				<real> 365 </real>
+				<real> 15 </real>
+				<real> 435 </real>
+				<real> 110 </real>
+				<resource name=""></resource>				<resource  external="6">  </resource>
+				<vector2> 0.5, 0.5 </vector2>
+				<real> 371 </real>
+				<real> 19 </real>
+				<real> 430 </real>
+				<real> 105 </real>
+				<real> 369 </real>
+				<real> 25 </real>
+				<real> 432 </real>
+				<real> 111 </real>
+				<string> "?" </string>
+				<resource  external="7">  </resource>
+				<resource  external="8">  </resource>
+				<real> 85 </real>
+				<resource  external="9">  </resource>
+				<vector2> 0.75, 0.75 </vector2>
+				<real> 21 </real>
+				<real> 38 </real>
+				<real> 98 </real>
+				<real> 108 </real>
+				<string> "52" </string>
 			</array>
 			<string> "version" </string>
 			<int> 2 </int>

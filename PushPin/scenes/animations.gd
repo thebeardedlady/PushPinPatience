@@ -6,7 +6,8 @@ extends Node
 
 onready var main = get_node("../")
 onready var tween = get_node("../Tween")
-var total_tweens = 0
+onready var score = get_node("../score")
+onready var touch = get_node("../touch")
 
 func _ready():
 	# Called every time the node is added to the scene.
@@ -27,11 +28,13 @@ func _process(delta):
 		for i in range(main.deck.size()):
 			main.deck[i].set_process_input(true)
 		main.set_process(true)
+		score.set_process(true)
+		touch.set_process_input(true)
 		set_process(false)
 		tween.remove_all()
 		
 	elif(main.tweens_left == 1):
-		if(main.new_game == true):
+		if(score.new_game == true):
 			tween.remove_all()
 			
 			#delete cards
@@ -68,16 +71,16 @@ func _process(delta):
 				main.deck[i].set_pos(old_pos)
 				main.deck[i].set_z(i)
 			
-			get_node("../end_screen/end_message").hide()
-			get_node("../cards_left").set_text(str(main.deck.size()))
+			#get_node("../end_screen/end_message").hide()
+			get_node("../score/cards_left").set_text(str(main.deck.size()))
 			
 			var final_pos = Vector2(155, (main.top_pos + (main.shift/2)))
 			for i in range(main.deck.size()):
 				tween.interpolate_property(main.deck[i], "transform/pos", main.deck[i].get_pos(), final_pos, 1.0, tween.TRANS_QUAD, tween.EASE_OUT, 0.25) 
 				final_pos.y += main.shift
 				
-			main.new_game = false
-			main.tweens_left -= 1
+			score.new_game = false
+			main.tweens_left = 0
 			set_process(false)
 			tween.start()
 

@@ -1,0 +1,59 @@
+[gd_resource type="Animation" format=1]
+
+[resource]
+
+resource/name = "rules"
+length = 1.0
+loop = false
+step = 0.1
+tracks/0/type = "value"
+tracks/0/path = NodePath("card_back:rect/pos")
+tracks/0/interp = 1
+tracks/0/imported = false
+tracks/0/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ Vector2( 365, 15 ), Vector2( 300, 10 ) ] }
+tracks/1/type = "value"
+tracks/1/path = NodePath("card_back:rect/size")
+tracks/1/interp = 1
+tracks/1/imported = false
+tracks/1/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ Vector2( 70, 95 ), Vector2( 140, 285 ) ] }
+tracks/2/type = "value"
+tracks/2/path = NodePath("card_back:params/scale")
+tracks/2/interp = 1
+tracks/2/imported = false
+tracks/2/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ Vector2( 0.5, 0.5 ), Vector2( 1, 1.5 ) ] }
+tracks/3/type = "value"
+tracks/3/path = NodePath("icon:rect/pos")
+tracks/3/interp = 1
+tracks/3/imported = false
+tracks/3/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ Vector2( 369, 25 ), Vector2( 308, 79 ) ] }
+tracks/4/type = "value"
+tracks/4/path = NodePath("icon:rect/scale")
+tracks/4/interp = 1
+tracks/4/imported = false
+tracks/4/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ Vector2( 1, 1 ), Vector2( 2, 2 ) ] }
+tracks/5/type = "value"
+tracks/5/path = NodePath("icon:visibility/opacity")
+tracks/5/interp = 1
+tracks/5/imported = false
+tracks/5/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ 1.0, 0.0 ] }
+tracks/6/type = "value"
+tracks/6/path = NodePath("icon:rect/size")
+tracks/6/interp = 1
+tracks/6/imported = false
+tracks/6/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ Vector2( 63, 86 ), Vector2( 63, 84 ) ] }
+tracks/7/type = "value"
+tracks/7/path = NodePath("rules:rect/pos")
+tracks/7/interp = 1
+tracks/7/imported = false
+tracks/7/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ Vector2( 371, 19 ), Vector2( 310, 27 ) ] }
+tracks/8/type = "value"
+tracks/8/path = NodePath("rules:rect/size")
+tracks/8/interp = 1
+tracks/8/imported = false
+tracks/8/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ Vector2( 59, 86 ), Vector2( 118, 255 ) ] }
+tracks/9/type = "value"
+tracks/9/path = NodePath("rules:visibility/opacity")
+tracks/9/interp = 1
+tracks/9/imported = false
+tracks/9/keys = { "times":FloatArray( 0, 0.5 ), "transitions":FloatArray( 1, 1 ), "update":0, "values":[ 0.0, 1.0 ] }
+

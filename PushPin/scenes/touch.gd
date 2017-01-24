@@ -6,7 +6,7 @@ onready var main = get_node("../")
 func _ready():
 	# Called every time the node is added to the scene.
 	# Initialization here
-	set_process_input(true)
+	set_process_input(false)
 
 func _input(event):
 	if(event.type == InputEvent.SCREEN_DRAG or event.type == InputEvent.MOUSE_MOTION):
@@ -16,7 +16,10 @@ func _input(event):
 			if(main.deck[i].rect.has_point(event.pos)):
 				no_button = false
 		
-		if(get_node("../cards_left").get_rect().has_point(event.pos)):
+		if(get_node("../score/cardback").get_rect().has_point(event.pos)):
+			no_button = false
+		
+		if(get_node("../rules_button/card_back").get_rect().has_point(event.pos)):
 			no_button = false
 		
 		if(no_button == true):
@@ -44,7 +47,7 @@ func _input(event):
 				var temp_card = main.deck[back]
 				main.deck.pop_back()
 				main.deck.push_front(temp_card)
-			elif(main.deck[0].get_pos().y < main.top_pos):
+			if(main.deck[0].get_pos().y < main.top_pos):
 				var temp_pos = main.deck[0].get_pos()
 				var last = main.deck.size() - 1
 				temp_pos.y = main.deck[last].get_pos().y + main.shift

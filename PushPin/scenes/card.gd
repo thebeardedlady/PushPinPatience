@@ -16,5 +16,7 @@ func _ready():
 
 func _input(event):
 	if((event.type == InputEvent.MOUSE_BUTTON or event.type == InputEvent.SCREEN_TOUCH)):
-		if(rect.has_point(event.pos) and event.is_pressed()):
-			get_node("../").add_to_selected(self)
+		if(get_node("../rules_button/card_back").get_rect().has_point(event.pos) == false):
+			if(get_node("../score/cardback").get_rect().has_point(event.pos) == false):
+				if(rect.has_point(event.pos) and event.is_pressed()):
+					get_node("../").add_to_selected(self)

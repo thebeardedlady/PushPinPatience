@@ -195,24 +195,20 @@ func _process(delta):
 		if(moves_left == true):
 			break
 	
+	#game is over
 	if(moves_left == false and printed == false):
-		#get_node("end_screen").show()
 		out_of_moves = true
-		for i in range(deck.size()):
-			deck[i].set_process_input(false)
-			if(deck[i].is_selected == true):
-				deck[i].set_modulate(Color(1.0, 1.0, 1.0))
-				deck[i].is_selected = false
-		get_node("touch").set_process_input(false)
 		save("0")
 		if(deck.size() == 2):
 			print("You win")
+			for i in range(deck.size()):
+				deck[i].set_process_input(false)
+			get_node("touch").set_process_input(false)
 			get_node("end_screen/end_message").set_text(" You Win!  ")
 		else:
 			print("Out of Moves")
 			get_node("end_screen/end_message").set_text("Out of Moves")
 		get_node("end_screen/end_animation").play("end")
-		
 		printed = true
 	
 	if(pair.size() != 2):
@@ -280,6 +276,9 @@ func _process(delta):
 					else:
 						time = discard_up.size() * 0.1
 				
+				if(time < 0.2):
+					time = 0.2
+				
 				if(match_down == true):
 					new_size -= discard_down.size()
 					for i in range(discard_down.size()):
@@ -304,6 +303,13 @@ func _process(delta):
 						new_pos.y += shift
 						if(deck[i].get_opacity() != 1.0):
 							tween.interpolate_property(deck[i], "visibility/opacity", deck[i].get_opacity(), 1.0, time, tween.TRANS_QUAD, tween.EASE_OUT)
+				
+				if(new_size == 2):
+					for i in range(pair.size()):
+						tween.interpolate_property(pair[i], "modulate", pair[i].get_modulate(), Color(1.0,1.0,1.0), time, tween.TRANS_CUBIC, tween.EASE_IN_OUT)
+						pair[i].is_selected = false
+					pair.clear()
+				
 				set_process(false)
 				get_node("touch").set_process_input(false)
 				for i in range(deck.size()):

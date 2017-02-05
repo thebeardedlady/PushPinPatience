@@ -205,6 +205,27 @@ func _process(delta):
 				deck[i].set_process_input(false)
 			get_node("touch").set_process_input(false)
 			get_node("end_screen/end_message").set_text(" You Win!  ")
+			
+			var end = get_node("end_screen")
+			end.angular = rand_range(0.0, PI)
+			var rand = randi() % 81
+			rand = rand % 3
+			if(rand == 0):
+				end.angle = 2.4674011 #PI^2 / 4
+			elif(rand == 1):
+				end.angle = 2.846578 # e * PI / 3
+			elif(rand == 2):
+				end.angle = 2.7182818 # e
+			end.moving = false
+			
+			var anim = get_node("end_screen/Tween")
+			var pos = deck[0].get_pos()
+			
+			anim.interpolate_property(deck[0], "transform/pos", pos, pos, 0.4, anim.TRANS_LINEAR, 2)
+			anim.start()
+			
+			
+			set_process(false)
 		else:
 			print("Out of Moves")
 			get_node("end_screen/end_message").set_text("Out of Moves")
@@ -269,7 +290,7 @@ func _process(delta):
 				var new_size = deck.size()
 				var time = 0.0
 				if(match_down == true and match_up == true):
-					time = (discard_down.size() + discard_up.size()) * 0.05
+					time = (discard_down.size() + discard_up.size()) * 0.09
 				else:
 					if(match_down == true):
 						time = discard_down.size() * 0.1

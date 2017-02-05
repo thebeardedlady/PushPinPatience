@@ -28,6 +28,7 @@ func _input(event):
 		if(event.is_pressed() and press == false):
 			if(is_selected == true):
 				if(get_node("cardback").get_rect().has_point(event.pos)):
+					get_node("../end_screen/Tween").remove_all()
 					for i in range(main.deck.size()):
 						var new_pos = Vector2(0,0)
 						new_pos.y = main.rand_range_int(850, 1050)

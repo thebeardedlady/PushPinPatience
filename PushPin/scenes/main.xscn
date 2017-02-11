@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resource_file type="PackedScene" subresource_count="17" version="2.1" version_name="Godot Engine v2.1.stable.official">
-	<ext_resource path="res://scenes/main.gd" type="Script" index="0"></ext_resource>
-	<ext_resource path="res://cards/Back_B5.png" type="Texture" index="7"></ext_resource>
+	<ext_resource path="res://fonts/port-lligat-sans.regular.fnt" type="BitmapFont" index="2"></ext_resource>
+	<ext_resource path="res://animations/amethysta.regular.fnt" type="BitmapFont" index="8"></ext_resource>
 	<ext_resource path="res://cards/SuitSpades.png" type="Texture" index="13"></ext_resource>
 	<ext_resource path="res://cards/SuitHearts.png" type="Texture" index="12"></ext_resource>
 	<ext_resource path="res://cards/SuitClubs.png" type="Texture" index="15"></ext_resource>
+	<ext_resource path="res://cards/Back_B5.png" type="Texture" index="7"></ext_resource>
 	<ext_resource path="res://cards/SuitDiamonds.png" type="Texture" index="14"></ext_resource>
+	<ext_resource path="res://scenes/main.gd" type="Script" index="0"></ext_resource>
+	<ext_resource path="res://scenes/rules_button.gd" type="Script" index="6"></ext_resource>
 	<ext_resource path="res://scenes/animations.gd" type="Script" index="4"></ext_resource>
 	<ext_resource path="res://scenes/touch.gd" type="Script" index="5"></ext_resource>
-	<ext_resource path="res://scenes/rules_button.gd" type="Script" index="6"></ext_resource>
 	<ext_resource path="res://scenes/score.gd" type="Script" index="10"></ext_resource>
-	<ext_resource path="res://animations/amethysta.regular.fnt" type="BitmapFont" index="8"></ext_resource>
-	<ext_resource path="res://fonts/port-lligat-sans.regular.fnt" type="BitmapFont" index="2"></ext_resource>
-	<ext_resource path="res://animations/new_game.tres" type="Animation" index="11"></ext_resource>
-	<ext_resource path="res://animations/end.tres" type="Animation" index="3"></ext_resource>
-	<ext_resource path="res://animations/rules.tres" type="Animation" index="9"></ext_resource>
 	<ext_resource path="res://scenes/end_screen.gd" type="Script" index="1"></ext_resource>
+	<ext_resource path="res://animations/new_game.tres" type="Animation" index="11"></ext_resource>
+	<ext_resource path="res://animations/rules.tres" type="Animation" index="9"></ext_resource>
+	<ext_resource path="res://animations/end.tres" type="Animation" index="3"></ext_resource>
 	<main_resource>
 		<dictionary name="_bundled" shared="false">
 			<string> "conn_count" </string>

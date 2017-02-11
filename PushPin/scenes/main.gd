@@ -204,7 +204,7 @@ func _process(delta):
 			for i in range(deck.size()):
 				deck[i].set_process_input(false)
 			get_node("touch").set_process_input(false)
-			get_node("end_screen/end_message").set_text(" You Win!  ")
+			get_node("end_screen/end_message").set_text("You Win!")
 			
 			var end = get_node("end_screen")
 			end.angular = rand_range(0.0, PI)
